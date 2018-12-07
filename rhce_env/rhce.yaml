@@ -2,7 +2,6 @@ heat_template_version: 2016-10-14
 
 description: >
   My template
-
 parameters:
 
   # GENERIC
@@ -75,9 +74,11 @@ resources:
     type: OS::Nova::Server
     properties:
       flavor: { get_param: IPA_flavor }
-      name: IPA
+      name: srvIPA
       image: { get_param: image_name }
       key_name: { get_param: key_name }
+      networks:
+        - network: private_network
 
 # A SERVER RESOURCES
       
@@ -85,9 +86,11 @@ resources:
     type: OS::Nova::Server
     properties:
       flavor: { get_param: A_flavor }
-      name: IPA
+      name: srvA
       image: { get_param: image_name }
       key_name: { get_param: key_name }
+      networks:
+        - network: private_network
 
 # B SERVER RESOURCES
   
@@ -95,9 +98,11 @@ resources:
     type: OS::Nova::Server
     properties:
       flavor: { get_param: B_flavor }
-      name: IPA
+      name: srvB
       image: { get_param: image_name }
       key_name: { get_param: key_name }
+      networks:
+        - network: private_network
 
 # AWX SERVER RESOURCES
 
@@ -121,7 +126,7 @@ resources:
     type: OS::Nova::Server
     properties:
       flavor: { get_param: AWX_flavor }
-      name: IPA
+      name: srvAWX
       image: { get_param: image_name }
       key_name: { get_param: key_name }
       networks:

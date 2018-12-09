@@ -75,26 +75,9 @@ resources:
     properties:
       description: Tenant security group
       name: tenant_scr_grp
-
-# SECURITY GROUP RULE
-# ALLOW ICMP
-  icmp_security_rules:
-    type: OS::Neutron::SecurityGroupRule
-    properties:
-      security_group: { get_resource: security_group }
-      description: Allow ICMP trafic from Ingress
-      direction: ingress
-      protocol: icmp
-      remote_ip_prefix: 0.0.0.0/0
-# ALLOW SSH
-  ssh_security_rules:
-    type: OS::Neutron::SecurityGroupRule
-    properties:
-      security_group: { get_resource: security_group }
-      description: Allow ICMP trafic from Ingress
-      direction: ingress
-      protocol: ssh
-      remote_ip_prefix: 0.0.0.0/0
+      rules:
+        - { remote_ip_prefix: 0.0.0.0/22, direction: ingress, protocol: tcp, port_range_min: 22, port_range_max: 22 }
+        - { remote_ip_prefix: 0.0.0.0/22, direction: ingress, protocol: icmp }
 
 # IPA RESOURCES
 

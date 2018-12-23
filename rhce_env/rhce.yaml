@@ -121,11 +121,6 @@ resources:
     type: OS::Neutron::Port
     properties:
       network: { get_param: tenant_network }
-#      fixed_ips:
-#        - ip_address:
-#      security_groups:
-#        - { get_resource: proxy_sg }
-#        - { get_resource: vrrp_sg }
     
   AWX_floating:
     type: OS::Neutron::FloatingIP

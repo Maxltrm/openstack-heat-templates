@@ -1,7 +1,7 @@
 heat_template_version: 2016-10-14
 
 description: >
-  My template
+  This template configure a lab to train oneself with RHCE certification 
 parameters:
 
   # GENERIC
@@ -65,7 +65,26 @@ parameters:
     label: Awx Flavor
     description: Flavor for AWX server
     default: m1.small
-    
+  
+  ssh_allowed_cidr:
+    type: string
+    label: Private CIDR allowed
+    description: Private CIDR allowed to use SSH Connection
+    default: 192.168.100.0/24
+
+# User password
+# If your want random password use OS::Heat::RandomString resource
+
+  root_pwd:
+    type: string
+    label: Root Password
+    description: Root password
+
+  ansible_pwd:
+    type: string
+    label: Ansible Password
+    description: Ansible password
+
 resources:
 
 # SECURITY GROUP DEFINITION
@@ -76,6 +95,7 @@ resources:
       description: Tenant security group
       name: tenant_scrt_grp
       rules:
+        - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 80, port_range_max: 80 }
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 22, port_range_max: 22 }
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: icmp }
 
@@ -90,6 +110,12 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - network: private_network
+      user_data:
+        str_replace:
+          # not sure it works
+          template: {get_file: https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh}
+        params:
+          $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
 
 # A SERVER RESOURCES
       
@@ -102,6 +128,11 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - network: private_network
+      user_data:
+        str_replace:
+          template: {get_file: https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh}
+        params:
+          $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
 
 # B SERVER RESOURCES
   
@@ -114,6 +145,13 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - network: private_network
+      user_data:
+        str_replace:
+          template: {get_file: https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh}
+        params:
+          $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
+          $ROOT_PWD: {get_param: root_pwd }
+          $ANSIBLE_PWD: {get_param: ansible_pwd }
 
 # AWX SERVER RESOURCES
 
@@ -139,22 +177,18 @@ resources:
         - port: { get_resource: awx_port }
       user_data: |
         #!/bin/bash
-        systemctl stop firewalld
-        systemctl disable firewalld
+        echo "[*] INSTALLING AWX ON DOCKER"
         yum install -y epel-release
         yum install -y yum-utils device-mapper-persistent-data lvm2 ansible git python-devel python-pip python-docker-py vim-enhanced
-        sleep 5
         yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
         yum install docker-ce -y
         sleep 5
         systemctl start docker
         systemctl enable docker
-        sleep 5
         cd /tmp
         git clone https://github.com/ansible/awx.git
         sleep 5
         cd /tmp/awx
         git clone https://github.com/ansible/awx-logos.git
         sleep 5
-        cd /tmp/awx/installer/
-        ansible-playbook -i inventory install.yml
+        ansible-playbook -i /tmp/awx/installer/inventory install.yml

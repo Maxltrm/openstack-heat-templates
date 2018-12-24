@@ -73,17 +73,12 @@ parameters:
     default: 192.168.100.0/24
 
 # User password
-# If your want random password use OS::Heat::RandomString resource
+# If you want random password use OS::Heat::RandomString resource
 
   root_pwd:
     type: string
     label: Root Password
     description: Root password
-
-  ansible_pwd:
-    type: string
-    label: Ansible Password
-    description: Ansible password
 
 resources:
 

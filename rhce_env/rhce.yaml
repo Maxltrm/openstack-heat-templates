@@ -107,8 +107,7 @@ resources:
         - network: private_network
       user_data:
         str_replace:
-          # not sure it works
-          template: {get_file: https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh}
+          template: { get_file: "https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh" }
         params:
           $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
 
@@ -125,7 +124,7 @@ resources:
         - network: private_network
       user_data:
         str_replace:
-          template: {get_file: https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh}
+          template: { get_file: "https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh" }
         params:
           $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
 
@@ -142,11 +141,10 @@ resources:
         - network: private_network
       user_data:
         str_replace:
-          template: {get_file: https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh}
+          template: { get_file: "https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh" }
         params:
           $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
           $ROOT_PWD: {get_param: root_pwd }
-          $ANSIBLE_PWD: {get_param: ansible_pwd }
 
 # AWX SERVER RESOURCES
 

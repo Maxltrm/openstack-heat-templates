@@ -107,9 +107,17 @@ resources:
         - network: private_network
       user_data:
         str_replace:
-          template: { get_file: "https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh" }
-        params:
-          $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
+          template: |
+            #!/bin/bash
+            echo "[*] CONFIGURE SSH LOGIN"
+            echo "sshd: All" >> /etc/hosts.deny
+            echo "sshd: $ALLOWED_CIDR" >> /etc/hosts.allow
+            sed -i s/"PermitRootLogin no"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+            systemctl restart sshd
+            echo "$ROOT_PWD" | passwd --stding root
+          params:
+            $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
+            $ROOT_PWD: {get_param: root_pwd }
 
 # A SERVER RESOURCES
       
@@ -124,9 +132,17 @@ resources:
         - network: private_network
       user_data:
         str_replace:
-          template: { get_file: "https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh" }
-        params:
-          $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
+          template: |
+            #!/bin/bash
+            echo "[*] CONFIGURE SSH LOGIN"
+            echo "sshd: All" >> /etc/hosts.deny
+            echo "sshd: $ALLOWED_CIDR" >> /etc/hosts.allow
+            sed -i s/"PermitRootLogin no"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+            systemctl restart sshd
+            echo "$ROOT_PWD" | passwd --stding root
+          params:
+            $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
+            $ROOT_PWD: {get_param: root_pwd }
 
 # B SERVER RESOURCES
   
@@ -141,10 +157,17 @@ resources:
         - network: private_network
       user_data:
         str_replace:
-          template: { get_file: "https://raw.githubusercontent.com/Maxltrm/heat-stack/master/rhce_env/configure_ssh_login.sh" }
-        params:
-          $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
-          $ROOT_PWD: {get_param: root_pwd }
+          template: |
+            #!/bin/bash
+            echo "[*] CONFIGURE SSH LOGIN"
+            echo "sshd: All" >> /etc/hosts.deny
+            echo "sshd: $ALLOWED_CIDR" >> /etc/hosts.allow
+            sed -i s/"PermitRootLogin no"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+            systemctl restart sshd
+            echo "$ROOT_PWD" | passwd --stding root
+          params:
+            $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
+            $ROOT_PWD: {get_param: root_pwd }
 
 # AWX SERVER RESOURCES
 

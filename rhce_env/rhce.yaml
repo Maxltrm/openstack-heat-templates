@@ -109,12 +109,14 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            echo "[*] CONFIGURE SSH LOGIN"
+            echo "[*] CONFIGURE SSH ROOT LOGIN WITH PASSWORD"
             echo "sshd: All" >> /etc/hosts.deny
             echo "sshd: $ALLOWED_CIDR" >> /etc/hosts.allow
-            sed -i s/"PermitRootLogin no"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+            sed -i s/"#PermitRootLogin yes"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+            sed -i s/"PasswordAuthentication no"/"PasswordAuthentication yes"/g /etc/ssh/sshd_config
+            sed -i 's/GSSAPICleanupCredentials yes/GSSAPICleanupCredentials no/g' /etc/ssh/sshd_config
             systemctl restart sshd
-            echo "$ROOT_PWD" | passwd --stding root
+            echo $ROOT_PWD | passwd --stdin root
           params:
             $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
             $ROOT_PWD: {get_param: root_pwd }
@@ -134,12 +136,14 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            echo "[*] CONFIGURE SSH LOGIN"
+            echo "[*] CONFIGURE SSH ROOT LOGIN WITH PASSWORD"
             echo "sshd: All" >> /etc/hosts.deny
             echo "sshd: $ALLOWED_CIDR" >> /etc/hosts.allow
-            sed -i s/"PermitRootLogin no"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+            sed -i s/"#PermitRootLogin yes"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+            sed -i s/"PasswordAuthentication no"/"PasswordAuthentication yes"/g /etc/ssh/sshd_config
+            sed -i 's/GSSAPICleanupCredentials yes/GSSAPICleanupCredentials no/g' /etc/ssh/sshd_config
             systemctl restart sshd
-            echo "$ROOT_PWD" | passwd --stding root
+            echo $ROOT_PWD | passwd --stdin root
           params:
             $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
             $ROOT_PWD: {get_param: root_pwd }
@@ -159,12 +163,14 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            echo "[*] CONFIGURE SSH LOGIN"
+            echo "[*] CONFIGURE SSH ROOT LOGIN WITH PASSWORD"
             echo "sshd: All" >> /etc/hosts.deny
             echo "sshd: $ALLOWED_CIDR" >> /etc/hosts.allow
-            sed -i s/"PermitRootLogin no"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+            sed -i s/"#PermitRootLogin yes"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
+            sed -i s/"PasswordAuthentication no"/"PasswordAuthentication yes"/g /etc/ssh/sshd_config
+            sed -i 's/GSSAPICleanupCredentials yes/GSSAPICleanupCredentials no/g' /etc/ssh/sshd_config
             systemctl restart sshd
-            echo "$ROOT_PWD" | passwd --stding root
+            echo $ROOT_PWD | passwd --stdin root
           params:
             $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
             $ROOT_PWD: {get_param: root_pwd }
@@ -207,4 +213,4 @@ resources:
         cd /tmp/awx
         git clone https://github.com/ansible/awx-logos.git
         sleep 5
-        ansible-playbook -i /tmp/awx/installer/inventory install.yml
+        ansible-playbook -i /tmp/awx/installer/inventory /tmp/awx/installer/install.yml

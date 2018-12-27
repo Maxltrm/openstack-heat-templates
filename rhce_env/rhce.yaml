@@ -34,12 +34,12 @@ parameters:
     label: External network
     description: External network name
     
-  # IPA Specific
+  # Kerberos Specific
   
-  IPA_flavor:
+  KRB_flavor:
     type: string
-    label: IPA Server Flavor
-    description: Flavor for ipa server
+    label: KRB Server Flavor
+    description: Flavor for kerberos server
     default: m1.small
 
   # A Server Specific
@@ -64,7 +64,7 @@ parameters:
     type: string
     label: Awx Flavor
     description: Flavor for AWX server
-    default: m1.small
+    default: m1.medium
   
   ssh_allowed_cidr:
     type: string
@@ -94,13 +94,13 @@ resources:
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 22, port_range_max: 22 }
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: icmp }
 
-# IPA RESOURCES
+# KERBEROS RESOURCES
 
-  IPA_srv:
+  KRB_srv:
     type: OS::Nova::Server
     properties:
-      flavor: { get_param: IPA_flavor }
-      name: srvIPA
+      flavor: { get_param: KRB_flavor }
+      name: srvKRB
       image: { get_param: image_name }
       key_name: { get_param: key_name }
       networks:

@@ -84,17 +84,17 @@ resources:
 
 # SECURITY GROUP DEFINITION
 
-  security_group:
+  tenant_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
       description: Tenant security group
-      name: tenant_security_goup
+      name: tenant_security_group
       rules:
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 80, port_range_max: 80 }
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 22, port_range_max: 22 }
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: icmp }
 
-  security_group:
+  krb_security_group:
     type: OS::Neutron::SecurityGroup
     properties:
       description: Tenant security group
@@ -110,8 +110,8 @@ resources:
   krb_port:
     type: OS::Neutron::Port
     properties:
-      network: { get_param: private_network }
-    security_groups:
+      network: { get_param: tenant_network }
+      security_groups:
         - { get_resource: krb_security_group }
 
   KRB_srv:
@@ -144,9 +144,9 @@ resources:
   A_port:
     type: OS::Neutron::Port
     properties:
-      network: { get_param: private_network }
-    security_groups:
-        - { get_resource: tenant_security_goup }
+      network: { get_param: tenant_network }
+      security_groups:
+        - { get_resource: tenant_security_group }
 
   A_srv:
     type: OS::Nova::Server
@@ -178,9 +178,9 @@ resources:
   B_port:
     type: OS::Neutron::Port
     properties:
-      network: { get_param: private_network }
-    security_groups:
-        - { get_resource: tenant_security_goup }
+      network: { get_param: tenant_network }
+      security_groups:
+        - { get_resource: tenant_security_group }
 
   B_srv:
     type: OS::Nova::Server

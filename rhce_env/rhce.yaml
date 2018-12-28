@@ -88,13 +88,31 @@ resources:
     type: OS::Neutron::SecurityGroup
     properties:
       description: Tenant security group
-      name: tenant_scrt_grp
+      name: tenant_security_goup
       rules:
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 80, port_range_max: 80 }
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 22, port_range_max: 22 }
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: icmp }
 
+  security_group:
+    type: OS::Neutron::SecurityGroup
+    properties:
+      description: Tenant security group
+      name: krb_security_goup
+      rules:
+        - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 80, port_range_max: 80 }
+        - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 22, port_range_max: 22 }
+        - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: icmp }
+
+
 # KERBEROS RESOURCES
+
+  krb_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: private_network }
+    security_groups:
+        - { get_resource: krb_security_group }
 
   KRB_srv:
     type: OS::Nova::Server
@@ -104,7 +122,7 @@ resources:
       image: { get_param: image_name }
       key_name: { get_param: key_name }
       networks:
-        - network: private_network
+        - port: { get_resource: krb_port }
       user_data:
         str_replace:
           template: |
@@ -122,7 +140,14 @@ resources:
             $ROOT_PWD: {get_param: root_pwd }
 
 # A SERVER RESOURCES
-      
+
+  A_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: private_network }
+    security_groups:
+        - { get_resource: tenant_security_goup }
+
   A_srv:
     type: OS::Nova::Server
     properties:
@@ -131,7 +156,7 @@ resources:
       image: { get_param: image_name }
       key_name: { get_param: key_name }
       networks:
-        - network: private_network
+        - port: { get_resource: A_port }
       user_data:
         str_replace:
           template: |
@@ -149,7 +174,14 @@ resources:
             $ROOT_PWD: {get_param: root_pwd }
 
 # B SERVER RESOURCES
-  
+
+  B_port:
+    type: OS::Neutron::Port
+    properties:
+      network: { get_param: private_network }
+    security_groups:
+        - { get_resource: tenant_security_goup }
+
   B_srv:
     type: OS::Nova::Server
     properties:
@@ -158,7 +190,7 @@ resources:
       image: { get_param: image_name }
       key_name: { get_param: key_name }
       networks:
-        - network: private_network
+        - port: { get_resource: A_port }
       user_data:
         str_replace:
           template: |

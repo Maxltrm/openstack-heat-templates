@@ -106,6 +106,9 @@ resources:
       rules:
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 80, port_range_max: 80 }
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 22, port_range_max: 22 }
+        - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 88, port_range_max: 88 }
+        - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: tcp, port_range_min: 749, port_range_max: 749 }
+        - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: udp, port_range_min: 88, port_range_max: 88 }
         - { remote_ip_prefix: 0.0.0.0/0, direction: ingress, protocol: icmp }
 
 

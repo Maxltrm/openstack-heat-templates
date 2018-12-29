@@ -33,7 +33,7 @@ parameters:
     type: string
     label: External network
     description: External network name
-    
+  
   # Kerberos Specific
   
   KRB_flavor:
@@ -71,6 +71,10 @@ parameters:
     label: Private CIDR allowed
     description: Private CIDR allowed to use SSH Connection
     default: 192.168.100.0/24
+
+  automation_public_key:
+    type: string
+    label: Automation user public key
 
 # User password
 # If you want random password use OS::Heat::RandomString resource
@@ -127,7 +131,6 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            echo "[*] CONFIGURE SSH ROOT LOGIN WITH PASSWORD"
             echo "sshd: All" >> /etc/hosts.deny
             echo "sshd: $ALLOWED_CIDR" >> /etc/hosts.allow
             sed -i s/"#PermitRootLogin yes"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
@@ -135,9 +138,17 @@ resources:
             sed -i 's/GSSAPICleanupCredentials yes/GSSAPICleanupCredentials no/g' /etc/ssh/sshd_config
             systemctl restart sshd
             echo $ROOT_PWD | passwd --stdin root
+            useradd -d /home/automation -s /bin/bash automation
+            mkdir /home/automation/.ssh
+            chown -R automation:automation /home/automation/
+            echo -e "automation	ALL=(ALL)	NOPASSWD: ALL" | tee -a /etc/sudoers.d/automation
+            echo -e "$AUTOM_PUB" | tee -a /home/automation/.ssh/authorized_keys
+            chmod 600 /home/automation/.ssh/authorized_keys
+            chown automation:automation /home/automation/.ssh/authorized_keys
           params:
             $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
             $ROOT_PWD: {get_param: root_pwd }
+            $AUTOM_PUB: {get_param: automation_public_key}
 
 # A SERVER RESOURCES
 
@@ -161,7 +172,6 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            echo "[*] CONFIGURE SSH ROOT LOGIN WITH PASSWORD"
             echo "sshd: All" >> /etc/hosts.deny
             echo "sshd: $ALLOWED_CIDR" >> /etc/hosts.allow
             sed -i s/"#PermitRootLogin yes"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
@@ -169,9 +179,17 @@ resources:
             sed -i 's/GSSAPICleanupCredentials yes/GSSAPICleanupCredentials no/g' /etc/ssh/sshd_config
             systemctl restart sshd
             echo $ROOT_PWD | passwd --stdin root
+            useradd -d /home/automation -s /bin/bash automation
+            mkdir /home/automation/.ssh
+            chown -R automation:automation /home/automation/
+            echo -e "automation	ALL=(ALL)	NOPASSWD: ALL" | tee -a /etc/sudoers.d/automation
+            echo -e "$AUTOM_PUB" | tee -a /home/automation/.ssh/authorized_keys
+            chmod 600 /home/automation/.ssh/authorized_keys
+            chown automation:automation /home/automation/.ssh/authorized_keys
           params:
             $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
             $ROOT_PWD: {get_param: root_pwd }
+            $AUTOM_PUB: {get_param: automation_public_key}
 
 # B SERVER RESOURCES
 
@@ -195,7 +213,6 @@ resources:
         str_replace:
           template: |
             #!/bin/bash
-            echo "[*] CONFIGURE SSH ROOT LOGIN WITH PASSWORD"
             echo "sshd: All" >> /etc/hosts.deny
             echo "sshd: $ALLOWED_CIDR" >> /etc/hosts.allow
             sed -i s/"#PermitRootLogin yes"/"PermitRootLogin yes"/g /etc/ssh/sshd_config
@@ -203,9 +220,17 @@ resources:
             sed -i 's/GSSAPICleanupCredentials yes/GSSAPICleanupCredentials no/g' /etc/ssh/sshd_config
             systemctl restart sshd
             echo $ROOT_PWD | passwd --stdin root
+            useradd -d /home/automation -s /bin/bash automation
+            mkdir /home/automation/.ssh
+            chown -R automation:automation /home/automation/
+            echo -e "automation	ALL=(ALL)	NOPASSWD: ALL" | tee -a /etc/sudoers.d/automation
+            echo -e "$AUTOM_PUB" | tee -a /home/automation/.ssh/authorized_keys
+            chmod 600 /home/automation/.ssh/authorized_keys
+            chown automation:automation /home/automation/.ssh/authorized_keys
           params:
             $ALLOWED_CIDR: {get_param: ssh_allowed_cidr }
             $ROOT_PWD: {get_param: root_pwd }
+            $AUTOM_PUB: {get_param: automation_public_key}
 
 # AWX SERVER RESOURCES
 
@@ -229,20 +254,23 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: awx_port }
-      user_data: |
-        #!/bin/bash
-        echo "[*] INSTALLING AWX ON DOCKER"
-        yum install -y epel-release
-        yum install -y yum-utils device-mapper-persistent-data lvm2 ansible git python-devel python-pip python-docker-py vim-enhanced
-        yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-        yum install docker-ce -y
-        sleep 5
-        systemctl start docker
-        systemctl enable docker
-        cd /tmp
-        git clone https://github.com/ansible/awx.git
-        sleep 5
-        cd /tmp/awx
-        git clone https://github.com/ansible/awx-logos.git
-        sleep 5
-        ansible-playbook -i /tmp/awx/installer/inventory /tmp/awx/installer/install.yml
+      user_data:
+        str_replace:
+          template: |
+            #!/bin/bash
+            echo "[*] INSTALLING AWX ON DOCKER"
+            yum install -y epel-release
+            yum install -y yum-utils device-mapper-persistent-data lvm2 ansible git python-devel python-pip python-docker-py vim-enhanced
+            yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+            yum install docker-ce -y
+            sleep 5
+            systemctl start docker
+            systemctl enable docker
+            cd /tmp
+            git clone https://github.com/ansible/awx.git
+            sleep 5
+            cd /tmp/awx
+            git clone https://github.com/ansible/awx-logos.git
+            sleep 5
+            ansible-playbook -i /tmp/awx/installer/inventory /tmp/awx/installer/install.yml
+            useradd -d /home/automation -s /bin/bash automation
